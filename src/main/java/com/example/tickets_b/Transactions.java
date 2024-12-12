@@ -21,6 +21,7 @@ class Transactions {
     private String userType;
     private Integer ticketNo;
     private String action;
+    private String username; // New field
 
     // Getters and Setters
     public Long getId() {
@@ -46,6 +47,12 @@ class Transactions {
     }
     public void setAction(String action) {
         this.action = action;
+    }
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
 
@@ -73,11 +80,11 @@ class TransactionsService {
         return transactionsRepository.findById(id);
     }
 
-    public Transactions save(Transactions transactions) {
+    public synchronized Transactions save(Transactions transactions) {
         return transactionsRepository.save(transactions);
     }
 
-    public void deleteById(Long id) {
+    public synchronized void deleteById(Long id) {
         transactionsRepository.deleteById(id);
     }
 
@@ -92,7 +99,13 @@ class TransactionsService {
     public Integer getTotalUnsoldTickets() {
         Integer released = getTotalReleasedTickets();
         Integer sold = getTotalSoldTickets();
-        return (released != null && sold != null) ? (released - sold) : null;
+        if (released != null && sold != null) {
+            return released - sold;
+        } else if (released != null) {
+            return released;
+        } else {
+            return null;
+        }
     }
 }
 
